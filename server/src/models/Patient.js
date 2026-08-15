@@ -21,8 +21,10 @@ const patientSchema = new mongoose.Schema(
             enum: ["A+","A-","B+","B-","AB+","AB-","O+","O-"]
         },
         address: {
-            type: String,
-            trim: true
+            street: String,
+            city: String,
+            state: String,
+            pincode: String
         },
         emergencyContact: {
             name: {
@@ -37,6 +39,22 @@ const patientSchema = new mongoose.Schema(
                 type: String,
                 trim: true
             }
+        },
+        allergies: [
+            {
+                type: String,
+                trim: true
+            }
+        ],
+        chronicConditions: [
+            {
+                type: String,
+                trim: true
+            }
+        ],
+        isActive: {
+            type: Boolean,
+            default: true
         }
     },
     {
