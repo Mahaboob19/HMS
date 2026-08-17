@@ -3,6 +3,7 @@ const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const doctorRoutes = require("./routes/doctorRoutes");
 const patientRoutes = require("./routes/patientRoutes");
+const appointmentRoutes = require("./routes/appointmentRoutes");
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -17,5 +18,6 @@ app.get("/",(req,res) => {
 app.use("/api/v1/auth",authRoutes);
 app.use("/api/v1/doctors",doctorRoutes);
 app.use("/api/v1/patients", patientRoutes);
+app.use("/api/v1/appointments", appointmentRoutes);
 
 module.exports = app;
