@@ -1,6 +1,6 @@
 const express = require("express");
 const {protect, authorize} = require("../middleware/authMiddleware");
-const {createAppointmentController, getMyAppointmentController, getDoctorAppointmentsController, confirmAppointmentController, rejectAppointmentController, completeAppointmentController, cancelAppointmentController, getDoctorAvailabilityController} = require("../controllers/appointmentController");
+const {createAppointmentController, getMyAppointmentController, getDoctorAppointmentsController, confirmAppointmentController, rejectAppointmentController, completeAppointmentController, cancelAppointmentController, getDoctorAvailabilityController, getAllAppointmentsController} = require("../controllers/appointmentController");
 const { create } = require("../models/Patient");
 const router = express.Router();
 
@@ -12,5 +12,6 @@ router.put("/:id/confirm", protect, authorize("doctor"), confirmAppointmentContr
 router.put("/:id/reject", protect, authorize("doctor"), rejectAppointmentController);
 router.put("/:id/complete", protect, authorize("doctor"), completeAppointmentController);
 router.put("/:id/cancel", protect, authorize("patient"), cancelAppointmentController);
+router.get("/admin". protect, authorize("admin"), getAllAppointmentsController);
 
 module.exports = router;

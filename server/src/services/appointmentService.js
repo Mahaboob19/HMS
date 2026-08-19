@@ -428,4 +428,120 @@ const getDoctorAvailability = async ({doctorId, appointmentDate}) => {
     };
 };
 
-module.exports = {createAppointment, getMyAppointments, getDoctorAppointments, confirmAppointment, rejectAppointment, completeAppointment, cancelAppointment, getDoctorAvailability};
+const getAllAppointments = async ({status, doctorId, date, page=1, limit=10}) => {
+    const filter = {};
+
+    if(status){
+        const allowedStatuses = ["pending", "confirmed", "completed", "cancelled", "rejected"];
+        if(!allowedStatuses.includes(status)){
+            const err = new Error("Invalid appointment status");
+            err.statusCode = 400;
+            throw err;
+        }
+        filter.status = status;
+    }
+
+    if(doctorId){
+        if(!mongoose.Types.ObjectId.isValid(doctorId)){
+            const err = new Error("Invalid doctor ID");
+            err.statusCode = 400;
+            throw err;
+        }
+        filter.doctorId = doctorId;
+    }
+
+    if(date){
+        if(!isValidDateString(date)){
+            const err = new Error("Invalid date. Use YYYY-MM-DD");
+            err.statusCode = 400;
+            throw err;
+        }
+        filter.appointmentDate = createDateOnly(date);
+    }
+
+    const pageNumber = Math.max(Number(page), 1);
+    const limitNumber = Math.min(Math.max(Number(limit), 1), 100);
+    const skip = (pageNumber - 1) * limitNumber;
+
+    const [appointments, total] = await Promise.all([
+        Appointment.find(filter).populate({
+            path: "patientId",
+            populate: {
+                path: "userId",
+                select: "name email phone"
+            }
+        }).populate({
+            path: "doctorId",
+            populate: {
+                path: "userId",
+                select: "name email phone"
+            }
+        }).sort({
+            appointment: 1,
+            startTime: 1
+        }).skip(skip).limit(limitNumber), Appointment.countDocuments(filter)
+    ]);
+
+    return {
+        appointments,
+        pagination: {
+            page: pageNumber,
+            limit: limitNumber,
+            total,
+            totalPages: Math.ceil(total / limitNumber)
+        }
+    };
+};
+
+const getAppointmentStats = async () => {
+    const now = new Date();
+
+    const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), getUTCDate()));
+    const endOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
+
+    const [
+        totalAppointments,
+        pendingAppointments,
+        confirmedAppointments,
+        completedAppointments,
+        cancelledAppointments,
+        rejectedAppointments,
+        todayAppointments
+    ] = await Promise.all([
+        Appointment.countDocuments(),
+        Appointment.countDocuments({
+            status: "pending"
+        }),
+        Appointment.countDocuments({
+            status: "confirmed"
+        }),
+        Appointment.countDocuments({
+            status: "completed"
+        }),
+        Appointment.countDocuments({
+            status: "cancelled"
+        }),
+        Appointment.countDocuments({
+            status: "rejected"
+        }),
+        Appointment.countDocuments({
+            appointmentDate: {
+                $gte: startOfToday,
+                $lt: endOfToday
+            }
+        })
+    ]);
+
+    return {
+        totalAppointments,
+        pendingAppointments,
+        confirmedAppointments,
+        completedAppointments,
+        cancelledAppointments,
+        rejectedAppointments,
+        todayAppointments
+    };
+};
+
+
+module.exports = {createAppointment, getMyAppointments, getDoctorAppointments, confirmAppointment, rejectAppointment, completeAppointment, cancelAppointment, getDoctorAvailability, getAllAppointments, getAppointmentStats};

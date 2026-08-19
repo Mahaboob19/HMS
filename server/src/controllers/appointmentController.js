@@ -1,4 +1,4 @@
-const {createAppointment, getMyAppointments, getDoctorAppointments, confirmAppointment, rejectAppointment, completeAppointment, cancelAppointment, getDoctorAvailability} = require("../services/appointmentService");
+const {createAppointment, getMyAppointments, getDoctorAppointments, confirmAppointment, rejectAppointment, completeAppointment, cancelAppointment, getDoctorAvailability, getAllAppointments, getAppointmentStats} = require("../services/appointmentService");
 
 const createAppointmentController = async (req,res) => {
     try {
@@ -174,4 +174,34 @@ const getDoctorAvailabilityController = async (req,res) => {
     }
 };
 
-module.exports = {createAppointmentController, getMyAppointmentController, getDoctorAppointmentsController, confirmAppointmentController, rejectAppointmentController, completeAppointmentController, cancelAppointmentController, getDoctorAvailabilityController};
+const getAllAppointmentsController = async (req,res) => {
+    try {
+        const {status, doctorId, date, page, limit} = req.query;
+        const res = await getAllAppointments({status, doctorId, date, page, limit});
+        res.status(200).json({
+            success: true,
+            data: res.appointments,
+            pagination: res.pagination
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(err.statusCode || 500).json({
+            success: false,
+            message: err.message || "Failed to fetch appointments"
+        });
+    }
+};
+
+const getAppointmentStatsController = async (req,res) => {
+    try {
+        
+    } catch (err) {
+        console.error(err);
+        res.status(err.statusCode || 500).json({
+            success: false,
+            message: err.message || "Failed to get appointment stats"
+        });
+    }
+};
+
+module.exports = {createAppointmentController, getMyAppointmentController, getDoctorAppointmentsController, confirmAppointmentController, rejectAppointmentController, completeAppointmentController, cancelAppointmentController, getDoctorAvailabilityController, getAllAppointmentsController};
