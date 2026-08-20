@@ -5,6 +5,7 @@ const doctorRoutes = require("./routes/doctorRoutes");
 const patientRoutes = require("./routes/patientRoutes");
 const appointmentRoutes = require("./routes/appointmentRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const billingRoutes = require("./routes/billingRoutes");
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -21,5 +22,6 @@ app.use("/api/v1/doctors",doctorRoutes);
 app.use("/api/v1/patients", patientRoutes);
 app.use("/api/v1/appointments", appointmentRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
+app.use("/api/v1/billing", billingRoutes);
 
 module.exports = app;
